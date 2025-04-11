@@ -1,0 +1,6 @@
+@BertiniEventos.API_HostAddress = http://localhost:5030
+
+GET {{BertiniEventos.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
