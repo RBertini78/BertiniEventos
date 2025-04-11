@@ -22,17 +22,27 @@ using Microsoft.AspNetCore.Mvc;
                      Tema = "Aprendendo ASP.NET Core",
                      QtdPessoas = 250,
                      Lote = "1º Lote",
-                     ImagemURL = "foto.png"
+                     ImagemURL = "Sampa.png"
                  },
                  new Evento()
                  {
                      EventoId = 2,
                      Local = "Rio de Janeiro",
-                     DataEvento = DateTime.Now.AddDays(30).ToString("dd/MM/yyyy"),
-                     Tema = "Aprendendo ASP.NET Core",
+                     DataEvento = DateTime.Now.AddDays(45).ToString("dd/MM/yyyy"),
+                     Tema = "Angular e ASP.NET Core",
                      QtdPessoas = 300,
                      Lote = "2º Lote",
-                     ImagemURL = "foto.png"
+                     ImagemURL = "Rio.png"
+                 }
+                 new Evento()
+                 {
+                     EventoId = 3,
+                     Local = "Belo Horizonte",
+                     DataEvento = DateTime.Now.AddDays(50).ToString("dd/MM/yyyy"),
+                     Tema = "Aprendendo ASP.NET Core",
+                     QtdPessoas = 200,
+                     Lote = "1º Lote",
+                     ImagemURL = "BH.png"
                  }
              };
                   
