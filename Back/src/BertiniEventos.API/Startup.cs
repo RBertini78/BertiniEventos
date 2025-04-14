@@ -30,6 +30,7 @@ using Microsoft.Extensions.Configuration;
          {
              services.AddDbContext<DataContext>  (context => context.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
              services.AddControllers();
+             services.AddCors();
              services.AddSwaggerGen(c =>
              {
                  c.SwaggerDoc("v1", new OpenApiInfo { Title = "BertiniEventos.API", Version = "v1" });
@@ -51,6 +52,8 @@ using Microsoft.Extensions.Configuration;
              app.UseRouting();
  
              app.UseAuthorization();
+
+             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
  
              app.UseEndpoints(endpoints =>
              {
