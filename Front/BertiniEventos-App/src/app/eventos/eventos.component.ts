@@ -15,10 +15,29 @@ import { FormsModule } from '@angular/forms';
 export class EventosComponent implements OnInit {
 
   public eventos: any = [];
+  public eventosFiltrados: any = [];
+  public eventoSelecionado: any;
   widthImg: number = 150;
   marginImg: number = 2;
   showImg: boolean = true;
-  filterList: string = '';
+  private _filterList: string = '';
+
+  public get filterList(): string {
+    return this._filterList;
+  }
+  public set filterList(value: string) {
+    this._filterList = value;
+    this.eventosFiltrados = this.filterList ? this.filtrarEventos(this.filterList) : this.eventos;
+  }
+
+  filtrarEventos(filtrarPor: string): any {
+    filtrarPor = filtrarPor.toLocaleLowerCase();
+    return this.eventos.filter(
+      (evento: { tema: string; local: string; }) =>
+        evento.tema.toLocaleLowerCase().indexOf(filtrarPor) !== -1 ||
+        evento.local.toLocaleLowerCase().indexOf(filtrarPor) !== -1
+    );
+  }
   // Replace 'any' with the appropriate type for your eventos
   constructor(private http: HttpClient) { }
 
@@ -32,7 +51,7 @@ export class EventosComponent implements OnInit {
 
   public getEventos(): void {
 
-    this.http.get('https://localhost:7251/api/eventos').subscribe(response => this.eventos = response, error => console.error(error));
+    this.http.get('https://localhost:7251/api/eventos').subscribe(response =>{ this.eventos = response; this.eventosFiltrados = this.eventos}, error => console.error(error));
 
   }
   // Additional methods and properties can be added here
