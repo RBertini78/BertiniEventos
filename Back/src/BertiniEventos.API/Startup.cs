@@ -1,20 +1,14 @@
-using System;
- using System.Collections.Generic;
- using System.Linq;
- using System.Threading.Tasks;
-using BertiniEventos.API.Data;
-using Microsoft.AspNetCore.Builder;
- using Microsoft.AspNetCore.Hosting;
- using Microsoft.AspNetCore.HttpsPolicy;
- using Microsoft.AspNetCore.Mvc;
+using BertiniEventos.Application;
+using BertiniEventos.Application.Contratos;
+using BertiniEventos.Persistence;
+using BertiniEventos.Persistence.Contexto;
+using BertiniEventos.Persistence.Contratos;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
- using Microsoft.Extensions.DependencyInjection;
- using Microsoft.Extensions.Hosting;
- using Microsoft.Extensions.Logging;
- using Microsoft.OpenApi.Models;
- 
- namespace BertiniEventos.API
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
+
+namespace BertiniEventos.API
  {
      public class Startup
      {
@@ -28,8 +22,12 @@ using Microsoft.Extensions.Configuration;
          // This method gets called by the runtime. Use this method to add services to the container.
          public void ConfigureServices(IServiceCollection services)
          {
-             services.AddDbContext<DataContext>  (context => context.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
-             services.AddControllers();
+             services.AddDbContext<BertiniEventosContext>(context => context.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+             services.AddControllers()
+             .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+             services.AddScoped<IEventosService, EventoService>();
+             services.AddScoped<IGeralPersist, GeralPersist>();
+             services.AddScoped<IEventoPersist, EventosPersist>();
              services.AddCors();
              services.AddSwaggerGen(c =>
              {
