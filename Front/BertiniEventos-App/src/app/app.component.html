@@ -1,11 +1,18 @@
 <app-nav></app-nav>
 
 <div class="container">
-  <h2>Eventos</h2>
-  <hr>
-  <app-eventos></app-eventos>
-
-
-
+   
   <router-outlet></router-outlet>
+  
 </div>
+
+<ngx-spinner
+  bdColor="rgba(0,0,0,0.8)"
+  size="medium"
+  color="#fff"
+  type="ball-spin"
+  [fullScreen]="true"
+  name="spinner"
+  [zIndex]="9999">
+  <p style="font-size: 20px; color: white">Carregando...</p>
+</ngx-spinner>
