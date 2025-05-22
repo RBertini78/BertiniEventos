@@ -3,13 +3,12 @@ import { BrowserModule } from "@angular/platform-browser";
 import { provideHttpClient } from "@angular/common/http";
 import { FormsModule } from "@angular/forms";
 
-import {AppRoutingModule} from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { ContatosComponent } from "./components/contatos/contatos.component";
 import { DashboardComponent } from "./components/dashboard/dashboard.component";
 import { EventosComponent } from "./components/eventos/eventos.component";
 import { PalestrantesComponent } from "./components/palestrantes/palestrantes.component";
-import { PerfilComponent } from "./components/perfil/perfil.component";
+import { PerfilComponent } from "./components/user/perfil/perfil.component";
 import {NavComponent} from "./shared/nav/nav.component";
 import {TituloComponent} from "./shared/titulo/titulo.component";
 
@@ -24,11 +23,9 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { EventoService } from "./services/evento.service";
 import { DateTimeFormatPipe } from "./helpers/DateTimeFormat.pipe";
 
-
 @NgModule({
   imports: [
     BrowserModule,
-    AppRoutingModule,
     BrowserAnimationsModule,
     CollapseModule.forRoot(),
     FormsModule,

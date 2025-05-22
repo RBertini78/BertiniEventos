@@ -8,7 +8,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { ToastrModule } from 'ngx-toastr';
 import { ContatosComponent } from "./components/contatos/contatos.component";
 import { DashboardComponent } from "./components/dashboard/dashboard.component";
-import { PerfilComponent } from "./components/perfil/perfil.component";
+import { PerfilComponent } from "./components/user/perfil/perfil.component";
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 @Component({
