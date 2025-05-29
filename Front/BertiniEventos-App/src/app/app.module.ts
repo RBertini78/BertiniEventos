@@ -1,7 +1,7 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { provideHttpClient } from "@angular/common/http";
-import { FormsModule } from "@angular/forms";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
 import { AppComponent } from "./app.component";
 import { ContatosComponent } from "./components/contatos/contatos.component";
@@ -29,6 +29,7 @@ import { DateTimeFormatPipe } from "./helpers/DateTimeFormat.pipe";
     BrowserAnimationsModule,
     CollapseModule.forRoot(),
     FormsModule,
+    ReactiveFormsModule,
     DateTimeFormatPipe,
     TooltipModule.forRoot(),
     BsDropdownModule.forRoot(),
