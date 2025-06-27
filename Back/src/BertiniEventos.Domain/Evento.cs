@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace BertiniEventos.Domain
 {
-    public class Evento
+        public class Evento
     {
         public int Id { get; set; }
         public string Local { get; set; }

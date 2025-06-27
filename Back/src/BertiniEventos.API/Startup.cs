@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using AutoMapper;
 
 namespace BertiniEventos.API
  {
@@ -25,6 +26,7 @@ namespace BertiniEventos.API
              services.AddDbContext<BertiniEventosContext>(context => context.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
              services.AddControllers()
              .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
              services.AddScoped<IEventosService, EventoService>();
              services.AddScoped<IGeralPersist, GeralPersist>();
              services.AddScoped<IEventoPersist, EventosPersist>();

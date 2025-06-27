@@ -2,18 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BertiniEventos.Domain;
+using BertiniEventos.Application.Dtos;
+
 
 namespace BertiniEventos.Application.Contratos
 {
     public interface IEventosService
     {
-       Task<Evento> AddEventos(Evento model);
-       Task<Evento> UpdateEventos(int eventoId, Evento model);
+       Task<EventoDto> AddEventos(EventoDto model);
+       Task<EventoDto> UpdateEventos(int eventoId, EventoDto model);
        Task<bool>DeleteEventos(int eventoId);
 
-       Task<Evento[]> GetAllEventosAsync(bool includePalestrantes = false);
-       Task<Evento[]> GetAllEventosByTemaAsync(string tema, bool includePalestrantes = false);
-       Task<Evento> GetEventosByIdAsync(int eventoId, bool includePalestrantes = false);
+       Task<EventoDto[]> GetAllEventosAsync(bool includePalestrantes = false);
+       Task<EventoDto[]> GetAllEventosByTemaAsync(string tema, bool includePalestrantes = false);
+       Task<EventoDto> GetEventosByIdAsync(int eventoId, bool includePalestrantes = false);
     }
 }
