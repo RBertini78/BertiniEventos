@@ -15,7 +15,11 @@ import {TituloComponent} from "./shared/titulo/titulo.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
-import { BsDropdownModule } from 'ngx-bootstrap/dropdown'
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
+import { defineLocale } from 'ngx-bootstrap/chronos';
+import { ptBrLocale } from 'ngx-bootstrap/locale';
+
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { ToastrModule } from 'ngx-toastr';
 import { NgxSpinnerModule } from 'ngx-spinner';
@@ -23,6 +27,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { EventoService } from "./services/evento.service";
 import { DateTimeFormatPipe } from "./helpers/DateTimeFormat.pipe";
 
+defineLocale('pt-br', ptBrLocale);
 @NgModule({
   imports: [
     BrowserModule,
@@ -33,6 +38,7 @@ import { DateTimeFormatPipe } from "./helpers/DateTimeFormat.pipe";
     DateTimeFormatPipe,
     TooltipModule.forRoot(),
     BsDropdownModule.forRoot(),
+    BsDatepickerModule.forRoot(),
     ModalModule.forRoot(),
     ToastrModule.forRoot({
       timeOut: 5000,

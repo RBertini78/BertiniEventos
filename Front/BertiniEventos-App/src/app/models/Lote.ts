@@ -1,5 +1,3 @@
-import { Evento } from "./Evento";
-
 export interface Lote {
     id: number;
     nome: string;
@@ -8,5 +6,4 @@ export interface Lote {
     dataFim?: Date;
     quantidade: number;
     eventoId: number;
-    evento: Evento;
 }

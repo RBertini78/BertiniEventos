@@ -21,7 +21,7 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
     NgxSpinnerModule,
     ToastrModule,
     DateTimeFormatPipe,
-    CollapseModule
+    CollapseModule,
   ],
   templateUrl: './evento-lista.component.html',
   styleUrl: './evento-lista.component.scss',
@@ -31,12 +31,12 @@ export class EventoListaComponent {
 
   public eventos: Evento[] = [];
   public eventosFiltrados: Evento[] = [];
-  //public eventoSelecionado: Evento;
+  public eventoId = 0;
+
   public widthImg: number = 150;
   public marginImg: number = 2;
   public showImg: boolean = true;
   private _filterList: string = '';
-  
 
   public get filterList(): string {
     return this._filterList;
@@ -66,6 +66,7 @@ export class EventoListaComponent {
   ) {}
 
   public ngOnInit(): void {
+    this.toastr.clear();
     this.spinner.show('spinner', {
       type: 'ball-spin',
       size: 'medium',
@@ -95,19 +96,42 @@ export class EventoListaComponent {
     });
   }
 
-  openModal(template: TemplateRef<void>) {
+  openModal(event: any, template: TemplateRef<void>, eventoId: number) {
+    event.stopPropagation();
+    this.eventoId = eventoId;
     this.modalRef = this.modalService.show(template, { class: 'modal-sm' });
   }
 
   confirm(): void {
     this.modalRef?.hide();
-    this.toastr.success('O evento foi deletado com sucesso!', 'Deletado!');
+    this.spinner.show();
+    this.eventoService.deleteEvento(this.eventoId).subscribe(
+      (result: any) => {
+        if(result.message ==='Deletado'){
+          this.toastr.success(
+            'O evento foi deletado com sucesso!',
+            'Deletado!'
+          );
+        this.spinner.hide();
+        this.getEventos();
+      }
+      },
+      (error: any) => {
+        this.toastr.error(
+          `Erro ao tentar deletar o evento ${this.eventoId}`,
+          'Erro!'
+        );
+        this.spinner.hide();
+        console.error(error);
+      },
+      () => this.spinner.hide()
+    );
   }
 
   decline(): void {
     this.modalRef?.hide();
-  } 
-  
+  }
+
   detalheEvento(id: number): void {
     this.router.navigate([`/eventos/detalhe/${id}`]);
   }

@@ -1,16 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormGroup,
-  FormsModule,
-  FormControl,
-  ReactiveFormsModule,
-  Validators,
-  FormBuilder,
-} from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { NgxSpinnerModule } from 'ngx-spinner';
-import { ToastrModule } from 'ngx-toastr';
+import { FormGroup, FormsModule, FormControl, ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+
+import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
+import { ToastrModule, ToastrService } from 'ngx-toastr';
+import { BsDatepickerModule, BsLocaleService } from 'ngx-bootstrap/datepicker';
+import { defineLocale } from 'ngx-bootstrap/chronos';
+import { ptBrLocale } from 'ngx-bootstrap/locale';
+
+import { EventoService } from '@app/services/evento.service';
+import { Evento } from '@app/models/Evento';
+import { DateTimeFormatPipe } from '@app/helpers/DateTimeFormat.pipe';
+
+
+defineLocale('pt-br', ptBrLocale);
 
 @Component({
   selector: 'app-evento-detalhe',
@@ -22,20 +26,66 @@ import { ToastrModule } from 'ngx-toastr';
     NgxSpinnerModule,
     ToastrModule,
     ReactiveFormsModule,
+    BsDatepickerModule,
+    DateTimeFormatPipe,
   ],
   templateUrl: './evento-detalhe.component.html',
   styleUrl: './evento-detalhe.component.scss',
 })
 export class EventoDetalheComponent implements OnInit {
+  evento = {} as Evento;
   form: FormGroup = new FormGroup({});
+  estadoSalvar = 'post';
 
   get f(): any {
     return this.form.controls;
   }
 
-  constructor(private fb: FormBuilder) {}
+  get bsConfig(): any {
+    return {
+      dateInputFormat: 'DD/MM/YYYY hh:mm a',
+      adaptivePosition: true,
+      containerClass: 'theme-default',
+      showWeekNumbers: false,
+    };
+  }
+
+  constructor(
+    private fb: FormBuilder,
+    private localeService: BsLocaleService,
+    private router: ActivatedRoute,
+    private eventoService: EventoService,
+    private spinner: NgxSpinnerService,
+    private toastr: ToastrService
+  ) {
+    this.localeService.use('pt-br');
+  }
+
+  public carregarEvento(): void {
+    const eventoIdParam = this.router.snapshot.paramMap.get('id');
+
+    if(eventoIdParam !== null) {
+      this.spinner.show();
+
+      this.estadoSalvar = 'put';
+
+      this.eventoService.getEventosById(+eventoIdParam).subscribe({
+        next: (evento: Evento) => {
+          this.evento = {... evento};
+          this.form.patchValue(this.evento);
+        },
+        error: (error: any) => {
+          this.spinner.hide();
+          this.toastr.error('Erro ao carregar Evento.', 'Erro!');
+          console.error(error);          
+        },
+        complete: () => this.spinner.hide(),
+      });
+    }
+  }
 
   ngOnInit(): void {
+    this.carregarEvento();
     this.validation();
   }
 
@@ -78,4 +128,38 @@ export class EventoDetalheComponent implements OnInit {
   public resetForm(): void {
     this.form.reset();
   }
+
+  public cssValidator(field: FormControl): any {
+    return {'is-invalid': field.errors && field.touched};
+  }
+
+  public salvarAlteracao(): void {
+    this.spinner.show();
+    if(this.form.valid){
+      
+      const eventoData = {
+        ...this.form.value,
+        lote: '', // String vazia conforme EventoDto
+        lotes: [], // Array vazio conforme EventoDto
+        palestrantes: [], // Array vazio conforme EventoDto
+        redesSociais: [] // Array vazio conforme EventoDto
+      };
+      
+      this.evento = (this.estadoSalvar === 'post') 
+        ? eventoData
+        : {id: this.evento.id, ...eventoData};
+
+      this.eventoService[this.estadoSalvar](this.evento).subscribe(
+         () => this.toastr.success('Evento salvo com sucesso!', 'Sucesso!'),
+         (error: any) => {
+          console.error(error);
+          this.spinner.hide();
+          this.toastr.error('Erro ao salvar evento!', 'Erro!');
+        },
+        () => this.spinner.hide()
+      );      
+    }
+  }
+
+  
 }

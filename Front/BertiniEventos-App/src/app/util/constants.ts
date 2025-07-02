@@ -5,5 +5,5 @@ export interface Constants {
 
 export const Constants: Constants = {
    DATE_TIME: 'dd/MM/yyyy',
-   DATE_TIME_FMT: 'dd/MM/yyyy hh:mm'
+   DATE_TIME_FMT: 'dd/MM/yyyy hh:mm a'
 }

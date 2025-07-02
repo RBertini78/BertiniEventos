@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using BertiniEventos.Application.Dtos;
+using AutoMapper;
 
 namespace BertiniEventos.API.Controllers
 {
@@ -18,10 +19,12 @@ namespace BertiniEventos.API.Controllers
     public class EventosController : ControllerBase
     {
         private readonly IEventosService _eventoService;
+        private readonly IMapper _mapper;
 
-        public EventosController(IEventosService eventoService)
+        public EventosController(IEventosService eventoService, IMapper mapper)
         {
             _eventoService = eventoService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -32,23 +35,8 @@ namespace BertiniEventos.API.Controllers
                 var eventos = await _eventoService.GetAllEventosAsync(true);
                 if (eventos == null || !eventos.Any())
                     return NotFound("Nenhum evento encontrado.");
-                    
-                    var eventosRetorno = new List<EventoDto>();
 
-                    foreach (var evento in eventos)
-                    {
-                        eventosRetorno.Add(new EventoDto(evento)
-                        {
-                            Id = evento.Id,
-                            Local = evento.Local,
-                            DataEvento = evento.DataEvento.ToString(),
-                            Tema = evento.Tema,
-                            QtdPessoas = evento.QtdPessoas,
-                            Lote = evento.Lote,
-                            ImagemURL = evento.ImagemURL,
-                        });
-                    }
-
+                var eventosRetorno = _mapper.Map<List<EventoDto>>(eventos);
                 return Ok(eventosRetorno);
             }
             catch (Exception ex)
@@ -130,10 +118,12 @@ namespace BertiniEventos.API.Controllers
         {
             try
             {
-                if (await _eventoService.DeleteEventos(id))
-                    return Ok("Evento excluído com sucesso.");
-                else
-                    return BadRequest("Erro ao tentar excluir evento.");
+                var evento = await _eventoService.GetEventosByIdAsync(id, true);
+                if (evento == null) return NoContent();
+
+                return await _eventoService.DeleteEventos(id)
+                    ? Ok (new { message = "Deletado."})
+                    : throw new Exception("Ocorreu um problema não específico ao tentar deletar Evento.");
             }
             catch (Exception ex)
             {
