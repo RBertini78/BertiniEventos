@@ -1,13 +1,10 @@
 using BertiniEventos.Application;
 using BertiniEventos.Application.Contratos;
+using BertiniEventos.Persistence.Contratos;
 using BertiniEventos.Persistence;
 using BertiniEventos.Persistence.Contexto;
-using BertiniEventos.Persistence.Contratos;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
-using AutoMapper;
 
 namespace BertiniEventos.API
  {
@@ -28,8 +25,10 @@ namespace BertiniEventos.API
              .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
              services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
              services.AddScoped<IEventosService, EventoService>();
+             services.AddScoped<ILoteService, LoteService>();
              services.AddScoped<IGeralPersist, GeralPersist>();
              services.AddScoped<IEventoPersist, EventosPersist>();
+             services.AddScoped<ILotePersist, LotePersist>();
              services.AddCors();
              services.AddSwaggerGen(c =>
              {
@@ -61,4 +60,6 @@ namespace BertiniEventos.API
              });
          }
      }
- }
+
+   
+}
