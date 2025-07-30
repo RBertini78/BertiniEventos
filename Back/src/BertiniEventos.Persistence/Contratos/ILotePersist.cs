@@ -21,6 +21,6 @@ namespace BertiniEventos.Persistence.Contratos
         /// <param name="eventoId"></param>
         /// <param name="loteId"></param>
         /// <returns>Apenas 1 lote</returns>
-        Task<Lote> GetLoteByIdsAsync(int eventoId, int loteId);        
+        Task<Lote> GetLoteByIdAsync(int eventoId, int loteId);        
     }
 }

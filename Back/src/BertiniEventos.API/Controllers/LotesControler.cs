@@ -68,9 +68,10 @@ namespace BertiniEventos.API.Controllers
         {
             try
             {
-                var lote = await _loteService.DeleteLote(eventoId, loteId)
+                return await _loteService.DeleteLote(eventoId, loteId)
                     ? Ok (new { message = "Deletado."})
                     : throw new Exception("Ocorreu um problema não específico ao tentar deletar Lote.");
+                    
             }
             catch (Exception ex)
             {

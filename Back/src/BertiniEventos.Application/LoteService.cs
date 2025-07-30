@@ -63,7 +63,7 @@ namespace BertiniEventos.Application
                     }
                 }                
 
-                   var loteRetorno = await _lotePersist.GetLoteByEventoIdAsync(eventoId);
+                   var loteRetorno = await _lotePersist.GetLotesByEventoIdAsync(eventoId);
                    return _mapper.Map<LoteDto[]>(loteRetorno);
             }
             catch (Exception ex)

@@ -18,7 +18,7 @@ namespace BertiniEventos.Persistence
            
         }
         
-        public async Task<Lote> GetLoteByIdsAsync(int eventoId, int id)
+        public async Task<Lote> GetLoteByIdAsync(int eventoId, int id)
         {
             IQueryable<Lote> query = _context.Lotes;
             query = query.AsNoTracking().Where(lote => lote.EventoId == eventoId && lote.Id == id);
