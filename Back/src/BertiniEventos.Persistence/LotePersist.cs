@@ -14,11 +14,10 @@ namespace BertiniEventos.Persistence
         private readonly BertiniEventosContext _context; 
         public LotePersist(BertiniEventosContext context) : base(context)
         {
-            _context = context;
-           
+            _context = context;           
         }
         
-        public async Task<Lote> GetLoteByIdAsync(int eventoId, int id)
+        public async Task<Lote> GetLoteByIdsAsync(int eventoId, int id)
         {
             IQueryable<Lote> query = _context.Lotes;
             query = query.AsNoTracking().Where(lote => lote.EventoId == eventoId && lote.Id == id);

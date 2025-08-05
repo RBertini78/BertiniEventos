@@ -21,9 +21,10 @@ namespace BertiniEventos.API.Controllers
         private readonly ILoteService _loteService;
         private readonly IMapper _mapper;
 
-        public LotesController(ILoteService LoteService)
+        public LotesController(ILoteService loteService, IMapper mapper)
         {
-            _loteService = LoteService;           
+            _loteService = loteService;
+            _mapper = mapper;
         }
 
         [HttpGet("{eventoId}")]
@@ -40,7 +41,7 @@ namespace BertiniEventos.API.Controllers
             }
             catch (Exception ex)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, $"Erro ao tentar recuperar lotes. Erro: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Erro ao tentar recuperar lotes. Erro: {ex.Message}");
             }
         }
           
@@ -59,7 +60,7 @@ namespace BertiniEventos.API.Controllers
             }
             catch (Exception ex)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, $"Erro ao tentar editar lotes. Erro: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Erro ao tentar editar lotes. Erro: {ex.Message}");
             }
         }
 
@@ -68,7 +69,11 @@ namespace BertiniEventos.API.Controllers
         {
             try
             {
-                return await _loteService.DeleteLote(eventoId, loteId)
+                var lote = await _loteService.GetLoteByIdsAsync(eventoId, loteId);
+                if (lote == null)
+                    return NoContent();
+
+                return await _loteService.DeleteLote(lote.EventoId, lote.Id)
                     ? Ok (new { message = "Deletado."})
                     : throw new Exception("Ocorreu um problema não específico ao tentar deletar Lote.");
                     

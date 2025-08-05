@@ -43,9 +43,7 @@ namespace BertiniEventos.Application
             try
             {
                 var lotes = await _lotePersist.GetLotesByEventoIdAsync(eventoId);
-                if (lotes == null) return null;
-
-                
+                if (lotes == null) return null;                                
 
                 foreach (var model in models)
                 {
@@ -75,7 +73,7 @@ namespace BertiniEventos.Application
         {
             try
             {
-                var lote = await _lotePersist.GetLoteByIdAsync(eventoId, loteId);
+                var lote = await _lotePersist.GetLoteByIdsAsync(eventoId, loteId);
                 if (lote == null) throw new Exception("Lote para delete não encontrado.");                
                 _geralPersist.Delete<Lote>(lote);
                 return await _geralPersist.SaveChangesAsync();               
@@ -100,11 +98,11 @@ namespace BertiniEventos.Application
                 throw new Exception(ex.Message);
             }
         }
-        public async Task<LoteDto> GetLoteByIdAsync(int eventoId, int loteId)
+        public async Task<LoteDto> GetLoteByIdsAsync(int eventoId, int loteId)
         {
             try
             {
-                var lote = await _lotePersist.GetLoteByIdAsync(eventoId, loteId);
+                var lote = await _lotePersist.GetLoteByIdsAsync(eventoId, loteId);
                 if (lote == null) return null;
                 var resultado = _mapper.Map<LoteDto>(lote);
                 return resultado;

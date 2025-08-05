@@ -11,6 +11,8 @@ import { PalestrantesComponent } from "./components/palestrantes/palestrantes.co
 import { PerfilComponent } from "./components/user/perfil/perfil.component";
 import {NavComponent} from "./shared/nav/nav.component";
 import {TituloComponent} from "./shared/titulo/titulo.component";
+import { LoginComponent } from "./components/user/login/login.component";
+import { RegistrationComponent } from "./components/user/registration/registration.component";
 
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { CollapseModule } from 'ngx-bootstrap/collapse';
@@ -26,6 +28,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 
 import { EventoService } from "./services/evento.service";
 import { DateTimeFormatPipe } from "./helpers/DateTimeFormat.pipe";
+
 
 defineLocale('pt-br', ptBrLocale);
 @NgModule({
