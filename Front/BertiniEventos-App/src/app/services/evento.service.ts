@@ -3,20 +3,19 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, take } from 'rxjs';
 import { Evento } from '../models/Evento';
 
-
-
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable(
+  {  providedIn: 'root'}
+)
 export class EventoService {
-    baseURL = 'https://localhost:7251/api/eventos';
+
+baseURL = 'https://localhost:7251/api/eventos';
 
     constructor(private http: HttpClient) {}
 
     public getEventos(): Observable<Evento[]> {
         return this.http.get<Evento[]>(this.baseURL).pipe(take(1));
     }
-    
+
     public getEventosByTema(tema: string): Observable<Evento[]> {
         return this.http.get<Evento[]>(`${this.baseURL}/${tema}/tema`).pipe(take(1));
     }
@@ -32,6 +31,5 @@ export class EventoService {
     public deleteEvento(id: number): Observable<any> {
         return this.http.delete(`${this.baseURL}/${id}`).pipe(take(1));
     }
-    
-}
 
+}

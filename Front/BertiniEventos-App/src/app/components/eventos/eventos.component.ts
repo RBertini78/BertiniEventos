@@ -19,11 +19,11 @@ import { TituloComponent } from '../../shared/titulo/titulo.component';
   selector: 'app-eventos',
   standalone: true,
   imports: [
-    CommonModule, 
-    CollapseModule, 
-    FormsModule, 
-    DateTimeFormatPipe, 
-    ModalModule, 
+    CommonModule,
+    CollapseModule,
+    FormsModule,
+    DateTimeFormatPipe,
+    ModalModule,
     NgxSpinnerModule,
     TituloComponent,
     RouterModule
@@ -34,7 +34,7 @@ import { TituloComponent } from '../../shared/titulo/titulo.component';
 })
 export class EventosComponent implements OnInit {
   ngOnInit(): void {
-      
+
   }
 
 }

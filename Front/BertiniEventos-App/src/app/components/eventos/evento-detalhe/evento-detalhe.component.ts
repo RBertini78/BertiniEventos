@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormGroup, FormsModule, FormControl, ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
+import { FormGroup, FormsModule, FormControl, ReactiveFormsModule, Validators, FormBuilder, FormArray } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
@@ -8,10 +8,12 @@ import { ToastrModule, ToastrService } from 'ngx-toastr';
 import { BsDatepickerModule, BsLocaleService } from 'ngx-bootstrap/datepicker';
 import { defineLocale } from 'ngx-bootstrap/chronos';
 import { ptBrLocale } from 'ngx-bootstrap/locale';
+import { TooltipModule } from 'ngx-bootstrap/tooltip';
 
 import { EventoService } from '@app/services/evento.service';
 import { Evento } from '@app/models/Evento';
 import { DateTimeFormatPipe } from '@app/helpers/DateTimeFormat.pipe';
+import { Lote } from '@app/models/Lote';
 
 
 defineLocale('pt-br', ptBrLocale);
@@ -28,6 +30,7 @@ defineLocale('pt-br', ptBrLocale);
     ReactiveFormsModule,
     BsDatepickerModule,
     DateTimeFormatPipe,
+    TooltipModule,
   ],
   templateUrl: './evento-detalhe.component.html',
   styleUrl: './evento-detalhe.component.scss',
@@ -48,6 +51,10 @@ export class EventoDetalheComponent implements OnInit {
       containerClass: 'theme-default',
       showWeekNumbers: false,
     };
+  }
+
+  get lotes(): FormArray {
+    return this.form.get('lotes') as FormArray;
   }
 
   constructor(
@@ -77,7 +84,7 @@ export class EventoDetalheComponent implements OnInit {
         error: (error: any) => {
           this.spinner.hide();
           this.toastr.error('Erro ao carregar Evento.', 'Erro!');
-          console.error(error);          
+          console.error(error);
         },
         complete: () => this.spinner.hide(),
       });
@@ -122,7 +129,23 @@ export class EventoDetalheComponent implements OnInit {
       ],
       email: ['', [Validators.required, Validators.email]],
       imagemURL: ['', Validators.required],
+      lotes: this.fb.array([])
     });
+  }
+
+  adicionarLote(): void {
+    this.lotes.push(this.criarLote({id:0} as Lote));
+  }
+
+  criarLote(lote: Lote): FormGroup {
+    return this.fb.group({
+        id: [lote.id],
+        nome: [lote.nome, Validators.required, Validators.minLength(4), Validators.maxLength(50 )],
+        quantidade: [lote.quantidade, [Validators.required, Validators.min(1), Validators.max(10000)]],
+        preco: [lote.preco, [Validators.required, Validators.min(0.01), Validators.max(100000)]],
+        dataInicio: [lote.dataInicio],
+        dataFim: [lote.dataFim]
+      });
   }
 
   public resetForm(): void {
@@ -136,7 +159,7 @@ export class EventoDetalheComponent implements OnInit {
   public salvarAlteracao(): void {
     this.spinner.show();
     if(this.form.valid){
-      
+
       const eventoData = {
         ...this.form.value,
         lote: '', // String vazia conforme EventoDto
@@ -144,8 +167,8 @@ export class EventoDetalheComponent implements OnInit {
         palestrantes: [], // Array vazio conforme EventoDto
         redesSociais: [] // Array vazio conforme EventoDto
       };
-      
-      this.evento = (this.estadoSalvar === 'post') 
+
+      this.evento = (this.estadoSalvar === 'post')
         ? eventoData
         : {id: this.evento.id, ...eventoData};
 
@@ -157,9 +180,9 @@ export class EventoDetalheComponent implements OnInit {
           this.toastr.error('Erro ao salvar evento!', 'Erro!');
         },
         () => this.spinner.hide()
-      );      
+      );
     }
   }
 
-  
+
 }
