@@ -9,6 +9,7 @@ import { NgxSpinnerService, NgxSpinnerModule } from 'ngx-spinner';
 import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { DateTimeFormatPipe } from '../../../helpers/DateTimeFormat.pipe';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
+import { environment } from '@environment/environment';
 
 @Component({
   selector: 'app-evento-lista',
@@ -37,6 +38,7 @@ export class EventoListaComponent {
   public marginImg: number = 2;
   public showImg: boolean = true;
   private _filterList: string = '';
+environment: any;
 
   public get filterList(): string {
     return this._filterList;
@@ -82,6 +84,12 @@ export class EventoListaComponent {
     this.showImg = !this.showImg;
   }
 
+  public mostraImagem(imagemURL: string): string {
+    return (imagemURL !== '')
+    ? `${environment.apiURL}resources/images/${imagemURL}`
+    : 'assets/sem_imagem.png';
+  }
+
   public getEventos(): void {
     this.eventoService.getEventos().subscribe({
       next: (_eventos: Evento[]) => {
@@ -107,14 +115,14 @@ export class EventoListaComponent {
     this.spinner.show();
     this.eventoService.deleteEvento(this.eventoId).subscribe(
       (result: any) => {
-        if(result.message ==='Deletado'){
+
           this.toastr.success(
             'O evento foi deletado com sucesso!',
             'Deletado!'
           );
         this.spinner.hide();
         this.getEventos();
-      }
+
       },
       (error: any) => {
         this.toastr.error(

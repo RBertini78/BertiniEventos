@@ -1,5 +1,5 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormGroup, FormsModule, FormControl, ReactiveFormsModule, Validators, FormBuilder, FormArray, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -10,13 +10,15 @@ import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { defineLocale } from 'ngx-bootstrap/chronos';
 import { ptBrLocale } from 'ngx-bootstrap/locale';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
+import { NgxCurrencyDirective } from 'ngx-currency';
 
 import { EventoService } from '@app/services/evento.service';
 import { LoteService } from '@app/services/lote.service';
 import { DateTimeFormatPipe } from '@app/helpers/DateTimeFormat.pipe';
 import { Evento } from '@app/models/Evento';
 import { Lote } from '@app/models/Lote';
-import { NgxCurrencyDirective } from 'ngx-currency';
+import { environment } from 'src/environments/environment';
+import e from 'express';
 
 
 defineLocale('pt-br', ptBrLocale);
@@ -37,6 +39,7 @@ defineLocale('pt-br', ptBrLocale);
   ],
   templateUrl: './evento-detalhe.component.html',
   styleUrl: './evento-detalhe.component.scss',
+  providers: [DatePipe],
 })
 export class EventoDetalheComponent implements OnInit {
   modalRef!: BsModalRef;
@@ -45,6 +48,9 @@ export class EventoDetalheComponent implements OnInit {
   form: FormGroup = new FormGroup({});
   estadoSalvar = 'post';
   loteAtual = {id: 0, nome: '', indice: 0};
+  imagemURL = 'assets/upload.png';
+  file!: File;
+enviroment: any;
 
   get f(): any {
     return this.form.controls;
@@ -58,15 +64,6 @@ export class EventoDetalheComponent implements OnInit {
       showWeekNumbers: false,
     };
   }
-
-  // get bsConfigLote(): any {
-  //   return {
-  //     dateInputFormat: 'DD/MM/YYYY',
-  //     adaptivePosition: true,
-  //     containerClass: 'theme-default',
-  //     showWeekNumbers: false,
-  //   };
-  // }
 
   get modoEditar(): boolean {
     return this.estadoSalvar === 'put';
@@ -86,6 +83,7 @@ export class EventoDetalheComponent implements OnInit {
     private modalService: BsModalService,
     private router: Router,
     private loteService: LoteService, // Assuming LoteService is similar to EventoService
+    private datePipe: DatePipe
   ) {
     this.localeService.use('pt-br');
   }
@@ -102,6 +100,10 @@ export class EventoDetalheComponent implements OnInit {
         next: (evento: Evento) => {
           this.evento = {... evento};
           this.form.patchValue(this.evento);
+          if(this.evento.imagemURL !== '') {
+            this.imagemURL =  environment.apiURL + 'resources/images/' + this.evento.imagemURL;
+            this.form.patchValue({ imagemURL: this.evento.imagemURL });
+          }
           this.carregarLotes();
         },
         error: (error: any) => {
@@ -116,14 +118,18 @@ export class EventoDetalheComponent implements OnInit {
   public carregarLotes(): void {
     this.loteService.getLotesByEventoId(this.eventoId).subscribe({
       next: (lotesRetorno: Lote[]) => {
-        lotesRetorno.forEach(lote  => {
+        lotesRetorno.forEach((lote)  => {
           this.lotes.push(this.criarLote(lote));
         });
       },
       error: (error: any) => {
+        if (error.status === 404) {
+          this.toastr.warning('Nenhum lote encontrado.', 'Aviso!');
+        } else {
         this.toastr.error('Erro ao carregar Lotes.', 'Erro!');
         console.error(error);
       }
+    }
     });
   }
 
@@ -164,13 +170,13 @@ export class EventoDetalheComponent implements OnInit {
         ],
       ],
       email: ['', [Validators.required, Validators.email]],
-      imagemURL: ['', Validators.required],
+      imagemURL: [''],
       lotes: this.fb.array([])
     });
   }
 
   public adicionarLote(): void {
-    this.lotes.push(this.criarLote({id:0} as Lote));
+    this.lotes.push(this.criarLote({ id:0 } as Lote));
   }
 
   public criarLote(lote: Lote): FormGroup {
@@ -180,7 +186,7 @@ export class EventoDetalheComponent implements OnInit {
         quantidade: [lote.quantidade, [Validators.required, Validators.min(1), Validators.max(10000)]],
         preco: [lote.preco, [Validators.required, Validators.min(0.01), Validators.max(100000)]],
         dataInicio: [lote.dataInicio],
-        dataFim: [lote.dataFim]
+        dataFim: [lote.dataFim],
       });
   }
 
@@ -203,18 +209,20 @@ export class EventoDetalheComponent implements OnInit {
   public salvarEvento(): void {
     this.spinner.show();
     if(this.form.valid){
-
-      // const eventoData = {
-      //   ...this.form.value,
-      //   lote: '', // String vazia conforme EventoDto
-      //   lotes: [], // Array vazio conforme EventoDto
-      //   palestrantes: [], // Array vazio conforme EventoDto
-      //   redesSociais: [] // Array vazio conforme EventoDto
-      // };
+      const eventoData = {
+        ... this.form.value,
+          palestrantes: [],
+          redesSociais: [],
+          lotes: this.form.value.lotes ?? [],
+          lote:'',
+          imagemURL: typeof this.form.value.imagemURL === 'string' && this.form.value.imagemURL.startsWith('data:')
+        ? ''
+        : this.form.value.imagemURL
+      };
 
       this.evento = (this.estadoSalvar === 'post')
-        ? {... this.form.value}
-        : {id: this.evento.id, ... this.form.value};
+        ? eventoData
+        : {id: this.evento.id, ...eventoData};
 
       this.eventoService[this.estadoSalvar](this.evento).subscribe(
          (eventoRetorno: Evento) => {
@@ -238,7 +246,7 @@ export class EventoDetalheComponent implements OnInit {
       this.loteService.saveLote(this.eventoId, this.form.value.lotes).subscribe({
         next: () => {
           this.toastr.success('Lote salvo com sucesso!', 'Sucesso!');
-          // this.lotes.reset();
+          this.lotes.reset();
           this.router.navigate([`/eventos/detalhe/${this.eventoId}`]);
         },
         error: (error: any) => {
@@ -282,4 +290,31 @@ export class EventoDetalheComponent implements OnInit {
   public declineExcluirLote(): void {
     this.modalRef.hide();
   }
+
+  onFileChange(ev: any): void {
+    const reader = new FileReader();
+
+    reader.onload = (event: any) => this.imagemURL = event.target.result;
+
+    this.file = ev.target.files;
+    reader.readAsDataURL(this.file[0]);
+
+    this.uploadImagem();
+  }
+
+
+ uploadImagem(): void {
+    this.spinner.show();
+    this.eventoService.postUpload(this.eventoId, this.file).subscribe({
+      next: () => {
+        this.carregarEvento();
+        this.toastr.success('Imagem do evento atualizada com sucesso!', 'Sucesso!');
+      },
+      error: (error: any) => {
+        this.toastr.error('Erro ao tentar atualizar a imagem do evento', 'Erro!');
+        console.log(error);
+      }
+    }).add(() => this.spinner.hide());
+  }
+
 }

@@ -5,6 +5,7 @@ using BertiniEventos.Persistence;
 using BertiniEventos.Persistence.Contexto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.FileProviders;
 
 namespace BertiniEventos.API
  {
@@ -53,6 +54,11 @@ namespace BertiniEventos.API
              app.UseAuthorization();
 
              app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+            app.UseStaticFiles(new StaticFileOptions{
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Resources")),
+                RequestPath = new PathString("/Resources")  
+            });
  
              app.UseEndpoints(endpoints =>
              {

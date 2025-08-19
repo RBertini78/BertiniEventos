@@ -3,6 +3,7 @@ using BertiniEventos.Application.Contratos;
 using BertiniEventos.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BertiniEventos.Application.Dtos;
 using AutoMapper;
+using System.IO;
 
 namespace BertiniEventos.API.Controllers
 {
@@ -19,11 +21,13 @@ namespace BertiniEventos.API.Controllers
     public class EventosController : ControllerBase
     {
         private readonly IEventosService _eventoService;
+        private readonly IWebHostEnvironment _hostEnvironment;
         private readonly IMapper _mapper;
 
-        public EventosController(IEventosService eventoService, IMapper mapper)
+        public EventosController(IEventosService eventoService, IWebHostEnvironment hostEnvironment, IMapper mapper)
         {
             _eventoService = eventoService;
+            _hostEnvironment = hostEnvironment;
             _mapper = mapper;
         }
 
@@ -96,6 +100,29 @@ namespace BertiniEventos.API.Controllers
             }
         }
 
+        [HttpPost("upload-image/{eventoId}")]
+        public async Task<IActionResult> UploadImage(int eventoId)
+        {
+            try
+            {
+                var evento = await _eventoService.GetEventosByIdAsync(eventoId, true);
+                if (evento == null) return NoContent();
+
+                var file = Request.Form.Files[0];
+                if (file.Length > 0)
+                {
+                    DeleteImage(evento.ImagemURL);
+                    evento.ImagemURL = await SaveImage(file);
+                }
+                var EventoRetorno = await _eventoService.UpdateEventos(eventoId, evento);
+                return Ok(EventoRetorno);
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, $"Erro ao tentar adicionar eventos. Erro: {ex.Message}");
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, EventoDto model)
         {
@@ -121,14 +148,46 @@ namespace BertiniEventos.API.Controllers
                 var evento = await _eventoService.GetEventosByIdAsync(id, true);
                 if (evento == null) return NoContent();
 
-                return await _eventoService.DeleteEventos(id)
-                    ? Ok (new { message = "Deletado."})
-                    : throw new Exception("Ocorreu um problema não específico ao tentar deletar Evento.");
+                if(await _eventoService.DeleteEventos(id))
+                {
+                    DeleteImage(evento.ImagemURL);
+                    return Ok(new { message = "Deletado" });
+                }
+                else
+                {
+                    throw new Exception("Ocorreu um erro não especifico ao tentar deletar o evento.");
+                }
             }
             catch (Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, $"Erro ao tentar excluir eventos. Erro: {ex.Message}");
             }
+        }
+
+        [NonAction]
+        public async Task<string> SaveImage(IFormFile imageFile)
+        {
+            string imageName = new string(Path.GetFileNameWithoutExtension(imageFile.FileName).Take(10).ToArray())
+                .Replace(' ', '-');
+            imageName = $"{imageName}{DateTime.UtcNow.ToString("yymmssfff")}{Path.GetExtension(imageFile.FileName)}";
+            
+            var imagePath = Path.Combine(_hostEnvironment.ContentRootPath, @"Resources/Images", imageName);
+
+            using (var fileStream = new FileStream(imagePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(fileStream);
+            }
+
+            return imageName;
+        }
+        
+
+        [NonAction]
+        public void DeleteImage(string imageName)
+        {
+            var imagePath = Path.Combine(_hostEnvironment.ContentRootPath, @"Resources/Images", imageName);
+            if (System.IO.File.Exists(imagePath))
+                System.IO.File.Delete(imagePath);
         }
     }
 }
