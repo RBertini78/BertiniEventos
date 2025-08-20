@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BertiniEventos.Domain.Identity;
 
 namespace BertiniEventos.Domain
 {
@@ -16,6 +17,8 @@ namespace BertiniEventos.Domain
         public string ImagemURL { get; set; }
         public string Telefone { get; set; }
         public string Email { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; }
         public IEnumerable<Lote> Lotes { get; set; }
         public IEnumerable<RedeSocial> RedesSociais { get; set; }
         public IEnumerable<PalestranteEvento> PalestrantesEventos { get; set; }
