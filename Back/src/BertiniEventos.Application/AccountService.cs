@@ -9,6 +9,7 @@ using BertiniEventos.Domain.Identity;
 using BertiniEventos.Persistence;
 using BertiniEventos.Persistence.Contratos;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace BertiniEventos.Application
 {
@@ -26,29 +27,97 @@ namespace BertiniEventos.Application
             _userPersist = userPersist;
 
         }
-        public Task<SignInResult> CheckUserPasswordAsync(UserUpdateDto userUpdateDto, string password)
+        public async Task<SignInResult> CheckUserPasswordAsync(UserUpdateDto userUpdateDto, string password)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = await _userManager.Users.SingleOrDefaultAsync(user => user.UserName == userUpdateDto.UserName.ToLower());
+
+                return await _signInManager.CheckPasswordSignInAsync(user, password, false);
+            }
+            catch (System.Exception ex)
+            {
+
+                throw new Exception($"Erro ao verificar password: {ex.Message}");
+            }
         }
 
-        public Task<UserDto> CreateAccountAsync(UserDto userDto)
+        public async Task<UserDto> CreateAccountAsync(UserDto userDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = _mapper.Map<User>(userDto);
+                var result = await _userManager.CreateAsync(user, userDto.Password);
+                if (result.Succeeded)
+                {
+                    var userToReturn = _mapper.Map<UserDto>(user);
+                    return userToReturn;
+                }
+                
+                return null;
+            }
+            catch (System.Exception ex)
+            {
+
+                throw new Exception($"Erro ao tentar criar usuário: {ex.Message}");
+            }
         }
 
-        public Task<UserUpdateDto> GetUserByUsernameAsync(string username)
+        public async Task<UserUpdateDto> GetUserByUserNameAsync(string userName)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = await _userPersist.GetUserByUserNameAsync(userName);
+                if (user == null) return null;
+
+                var userUpdateDto = _mapper.Map<UserUpdateDto>(user);
+                return userUpdateDto;
+            }
+            catch (System.Exception ex)
+            {
+
+                throw new Exception($"Erro ao verificar usuário por username: {ex.Message}");
+            }
         }
 
-        public Task<UserUpdateDto> UpdateAccount(UserUpdateDto userUpdateDto)
+        public async Task<UserUpdateDto> UpdateAccount(UserUpdateDto userUpdateDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = await _userPersist.GetUserByUserNameAsync(userUpdateDto.UserName);
+                if (user == null) return null;
+
+                _mapper.Map(userUpdateDto, user);
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var result = await _userManager.ResetPasswordAsync(user, token, userUpdateDto.Password);
+
+                _userPersist.Update<User>(user);
+                if (await _userPersist.SaveChangesAsync())
+                {
+                    var userRetorno = await _userPersist.GetUserByUserNameAsync(user.UserName);
+                    return _mapper.Map<UserUpdateDto>(userRetorno);
+                }
+                return null;
+            }
+            catch (System.Exception ex)
+            {
+
+                throw new Exception($"Erro ao tentar atualizar usuário: {ex.Message}");
+            }
         }
 
-        public Task<bool> UserExists(string username)
+        public async Task<bool> UserExists(string username)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _userManager.Users.AnyAsync(user => user.UserName == username.ToLower());
+            }
+            catch (System.Exception ex)
+            {
+
+                throw new Exception($"Erro ao verificar se usuário existe: {ex.Message}");
+            }
         }
     }
 }
