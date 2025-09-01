@@ -3,6 +3,7 @@ using System;
 using BertiniEventos.Persistence.Contexto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BertiniEventos.Persistence.Migrations
 {
     [DbContext(typeof(BertiniEventosContext))]
-    partial class BertiniEventosContextModelSnapshot : ModelSnapshot
+    [Migration("20250829202441_Alterando-Descricao")]
+    partial class AlterandoDescricao
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
@@ -117,6 +120,7 @@ namespace BertiniEventos.Persistence.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ImagemURL")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("LockoutEnabled")

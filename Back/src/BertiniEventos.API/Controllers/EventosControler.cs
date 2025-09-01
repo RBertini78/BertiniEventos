@@ -13,9 +13,12 @@ using System.Threading.Tasks;
 using BertiniEventos.Application.Dtos;
 using AutoMapper;
 using System.IO;
+using BertiniEventos.API.Extensions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BertiniEventos.API.Controllers
 {
+    [Authorize]    
     [ApiController]
     [Route("api/[controller]")]
     public class EventosController : ControllerBase
@@ -23,12 +26,14 @@ namespace BertiniEventos.API.Controllers
         private readonly IEventosService _eventoService;
         private readonly IWebHostEnvironment _hostEnvironment;
         private readonly IMapper _mapper;
+        private readonly IAccountService _accountService;
 
-        public EventosController(IEventosService eventoService, IWebHostEnvironment hostEnvironment, IMapper mapper)
+        public EventosController(IEventosService eventoService, IWebHostEnvironment hostEnvironment, IMapper mapper, IAccountService accountService)
         {
             _eventoService = eventoService;
             _hostEnvironment = hostEnvironment;
             _mapper = mapper;
+            _accountService = accountService;
         }
 
         [HttpGet]
@@ -36,7 +41,7 @@ namespace BertiniEventos.API.Controllers
         {
             try
             {
-                var eventos = await _eventoService.GetAllEventosAsync(true);
+                var eventos = await _eventoService.GetAllEventosAsync(User.GetUserID(), true);
                 if (eventos == null || !eventos.Any())
                     return NotFound("Nenhum evento encontrado.");
 
@@ -54,7 +59,7 @@ namespace BertiniEventos.API.Controllers
         {
             try
             {
-                var evento = await _eventoService.GetEventosByIdAsync(id, true);
+                var evento = await _eventoService.GetEventosByIdAsync(User.GetUserID(), id, true);
                 if (evento == null)
                     return NoContent();
 
@@ -71,7 +76,7 @@ namespace BertiniEventos.API.Controllers
         {
             try
             {
-                var eventos = await _eventoService.GetAllEventosByTemaAsync(tema, true);
+                var eventos = await _eventoService.GetAllEventosByTemaAsync(User.GetUserID(), tema, true);
                 if (eventos == null || !eventos.Any())
                     return NotFound("Nenhum evento encontrado.");
 
@@ -88,7 +93,7 @@ namespace BertiniEventos.API.Controllers
         {
             try
             {
-                var evento = await _eventoService.AddEventos(model);
+                var evento = await _eventoService.AddEventos(User.GetUserID(), model);
                 if (evento == null)
                     return BadRequest("Erro ao tentar adicionar evento.");
 
@@ -105,7 +110,7 @@ namespace BertiniEventos.API.Controllers
         {
             try
             {
-                var evento = await _eventoService.GetEventosByIdAsync(eventoId, true);
+                var evento = await _eventoService.GetEventosByIdAsync(User.GetUserID(), eventoId, true);
                 if (evento == null) return NoContent();
 
                 var file = Request.Form.Files[0];
@@ -114,7 +119,7 @@ namespace BertiniEventos.API.Controllers
                     DeleteImage(evento.ImagemURL);
                     evento.ImagemURL = await SaveImage(file);
                 }
-                var EventoRetorno = await _eventoService.UpdateEventos(eventoId, evento);
+                var EventoRetorno = await _eventoService.UpdateEventos(User.GetUserID(), eventoId, evento);
                 return Ok(EventoRetorno);
             }
             catch (Exception ex)
@@ -128,7 +133,7 @@ namespace BertiniEventos.API.Controllers
         {
             try
             {
-                var evento = await _eventoService.UpdateEventos(id, model);
+                var evento = await _eventoService.UpdateEventos(User.GetUserID(), id, model);
                 if (evento == null)
                     return BadRequest("Erro ao tentar atualizar evento.");
 
@@ -145,10 +150,10 @@ namespace BertiniEventos.API.Controllers
         {
             try
             {
-                var evento = await _eventoService.GetEventosByIdAsync(id, true);
+                var evento = await _eventoService.GetEventosByIdAsync(User.GetUserID(), id, true);
                 if (evento == null) return NoContent();
 
-                if(await _eventoService.DeleteEventos(id))
+                if(await _eventoService.DeleteEventos(User.GetUserID(), id))
                 {
                     DeleteImage(evento.ImagemURL);
                     return Ok(new { message = "Deletado" });
