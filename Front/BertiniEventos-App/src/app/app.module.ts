@@ -1,6 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
-import { provideHttpClient } from "@angular/common/http";
+import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
 import { AppComponent } from "./app.component";
@@ -27,9 +27,17 @@ import { ModalModule } from 'ngx-bootstrap/modal';
 import { ToastrModule } from 'ngx-toastr';
 import { NgxSpinnerModule } from 'ngx-spinner';
 
+import { JwtInterceptor } from "./interceptors/jwt.interceptor";
+
 import { EventoService } from "./services/evento.service";
 import { LoteService } from "./services/lote.service";
+import { AccountService } from "./services/account.service";
 import { DateTimeFormatPipe } from "./helpers/DateTimeFormat.pipe";
+import { EventoDetalheComponent } from "./components/eventos/evento-detalhe/evento-detalhe.component";
+import { EventoListaComponent } from "./components/eventos/evento-lista/evento-lista.component";
+import { HomeComponent } from "./components/home/home.component";
+import { UserComponent } from "./components/user/user.component";
+import { AuthGuard } from "./guard/auth.guard";
 
 
 defineLocale('pt-br', ptBrLocale);
@@ -52,15 +60,30 @@ defineLocale('pt-br', ptBrLocale);
       progressBar: true,
     }),
     NgxSpinnerModule,
-    TituloComponent,
-    NavComponent,
-    ContatosComponent,
-    DashboardComponent,
+    AppComponent,
     EventosComponent,
     PalestrantesComponent,
-    PerfilComponent
+    ContatosComponent,
+    DashboardComponent,
+    PerfilComponent,
+    NavComponent,
+    TituloComponent,
+    DateTimeFormatPipe,
+    EventoDetalheComponent,
+    EventoListaComponent,
+    HomeComponent,
+    UserComponent,
+    LoginComponent,
+    RegistrationComponent,
   ],
-  providers: [EventoService, LoteService, provideHttpClient()],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  providers: [
+    [AuthGuard],
+    EventoService,
+    LoteService,
+    AccountService,
+    provideHttpClient(withInterceptorsFromDi()),
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
+  ],
+  //schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule { }

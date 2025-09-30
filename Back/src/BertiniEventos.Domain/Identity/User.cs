@@ -9,13 +9,13 @@ namespace BertiniEventos.Domain.Identity
 {
     public class User : IdentityUser<int>
     {
-        public string PrimeiroNome { get; set; }
-        public string UltimoNome { get; set; }
-        public Titulo Titulo { get; set; }
-        public string? Descricao { get; set; }
-        public Funcao Funcao { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public Titulo Title { get; set; }
+        public string? Description { get; set; }
+        public Funcao Function { get; set; }
         public string? ImagemURL { get; set; }
-        public IEnumerable<UserRole> UserRoles { get; set; }
+        public IEnumerable<UserRole>? UserRoles { get; set; }
     }    
     
 }

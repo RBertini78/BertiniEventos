@@ -13,12 +13,14 @@ import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { NgxCurrencyDirective } from 'ngx-currency';
 
 import { EventoService } from '@app/services/evento.service';
+import { AccountService } from '@app/services/account.service';
 import { LoteService } from '@app/services/lote.service';
 import { DateTimeFormatPipe } from '@app/helpers/DateTimeFormat.pipe';
 import { Evento } from '@app/models/Evento';
 import { Lote } from '@app/models/Lote';
 import { environment } from 'src/environments/environment';
 import e from 'express';
+import { first } from 'rxjs';
 
 
 defineLocale('pt-br', ptBrLocale);
@@ -83,7 +85,8 @@ enviroment: any;
     private modalService: BsModalService,
     private router: Router,
     private loteService: LoteService, // Assuming LoteService is similar to EventoService
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private accountService: AccountService
   ) {
     this.localeService.use('pt-br');
   }
@@ -217,7 +220,14 @@ enviroment: any;
           lote:'',
           imagemURL: typeof this.form.value.imagemURL === 'string' && this.form.value.imagemURL.startsWith('data:')
         ? ''
-        : this.form.value.imagemURL
+        : this.form.value.imagemURL,
+        userDto: {
+          userName: this.accountService.currentUserValue?.userName ?? '',
+          email: this.accountService.currentUserValue?.email ?? '',
+          firstName: this.accountService.currentUserValue?.firstName ?? '',
+          lastName: this.accountService.currentUserValue?.lastName ?? '',
+          password: ''
+        }
       };
 
       this.evento = (this.estadoSalvar === 'post')
@@ -230,9 +240,21 @@ enviroment: any;
           this.router.navigate([`/eventos/detalhe/${eventoRetorno.id}`]);
         },
          (error: any) => {
-          console.error(error);
-          this.spinner.hide();
-          this.toastr.error('Erro ao salvar evento!', 'Erro!');
+          console.error('Erro completo',error);
+if (error.status === 400 && error.error?.errors) {
+    const validationErrors = error.error.errors;
+    for (const field in validationErrors) {
+      if (validationErrors.hasOwnProperty(field)) {
+        this.toastr.error(validationErrors[field].join(' '), `Erro no campo: ${field}`);
+      }
+    }
+  } else {
+    this.toastr.error('Erro ao salvar evento!', 'Erro!');
+  }
+
+
+          // this.spinner.hide();
+          // this.toastr.error('Erro ao salvar evento!', 'Erro!');
         },
         () => this.spinner.hide()
       );

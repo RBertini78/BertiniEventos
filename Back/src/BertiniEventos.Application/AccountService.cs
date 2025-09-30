@@ -31,7 +31,7 @@ namespace BertiniEventos.Application
         {
             try
             {
-                var user = await _userManager.Users.SingleOrDefaultAsync(user => user.UserName == userUpdateDto.UserName.ToLower());
+                var user = await _userManager.Users.SingleOrDefaultAsync(user => user.UserName == userUpdateDto.UserName!.ToLower());
 
                 return await _signInManager.CheckPasswordSignInAsync(user, password, false);
             }
@@ -42,7 +42,7 @@ namespace BertiniEventos.Application
             }
         }
 
-        public async Task<UserDto> CreateAccountAsync(UserDto userDto)
+        public async Task<UserUpdateDto> CreateAccountAsync(UserDto userDto)
         {
             try
             {
@@ -50,7 +50,7 @@ namespace BertiniEventos.Application
                 var result = await _userManager.CreateAsync(user, userDto.Password);
                 if (result.Succeeded)
                 {
-                    var userToReturn = _mapper.Map<UserDto>(user);
+                    var userToReturn = _mapper.Map<UserUpdateDto>(user);
                     return userToReturn;
                 }
                 
@@ -84,18 +84,23 @@ namespace BertiniEventos.Application
         {
             try
             {
-                var user = await _userPersist.GetUserByUserNameAsync(userUpdateDto.UserName);
+                var user = await _userPersist.GetUserByUserNameAsync(userUpdateDto.UserName!);
                 if (user == null) return null;
+
+                userUpdateDto.Id = user.Id;
 
                 _mapper.Map(userUpdateDto, user);
 
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var result = await _userManager.ResetPasswordAsync(user, token, userUpdateDto.Password);
+                if (userUpdateDto.Password != null)
+                {
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    await _userManager.ResetPasswordAsync(user, token, userUpdateDto.Password!);
+                }
 
                 _userPersist.Update<User>(user);
                 if (await _userPersist.SaveChangesAsync())
                 {
-                    var userRetorno = await _userPersist.GetUserByUserNameAsync(user.UserName);
+                    var userRetorno = await _userPersist.GetUserByUserNameAsync(user.UserName!);
                     return _mapper.Map<UserUpdateDto>(userRetorno);
                 }
                 return null;

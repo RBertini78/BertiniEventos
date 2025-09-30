@@ -3,6 +3,10 @@ import { AbstractControlOptions, FormBuilder, FormGroup, ReactiveFormsModule, Va
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ValidatorField } from '@app/helpers/ValidatorField';
+import { User } from '@app/models/identity/User';
+import { AccountService } from '@app/services/account.service';
+import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-registration',
@@ -16,9 +20,13 @@ import { ValidatorField } from '@app/helpers/ValidatorField';
   styleUrl: './registration.component.scss'
 })
 export class RegistrationComponent implements OnInit {
+  user = {} as User;
   form!: FormGroup;
 
-  constructor(public fb:FormBuilder) {}
+  constructor(private fb:FormBuilder,
+              private accountService: AccountService,
+              private router: Router,
+              private toastr: ToastrService) {}
 
   get f(): any { return this.form.controls; }
 
@@ -33,13 +41,21 @@ export class RegistrationComponent implements OnInit {
     };
 
     this.form = this.fb.group({
-      firstName: ['',Validators.required],
-      lastName: ['',Validators.required],
+      primeiroNome: ['',Validators.required],
+      ultimoNome: ['',Validators.required],
       email: ['',[Validators.required, Validators.email]],
       userName: ['',Validators.required],
       password: ['',[Validators.required, Validators.minLength(6)]],
       confirmPassword: ['',Validators.required],
     }, formOptions);
   }
+
+  register(): void {
+    this.user = { ... this.form.value };
+    this.accountService.register(this.user).subscribe(
+      () =>  this.router.navigateByUrl('/dashboard'),
+      (error: any) => this.toastr.error(error.error)
+    )
+}
 
 }

@@ -9,7 +9,7 @@
 
 	<div class="col-md-6">
 
-	<form [formGroup]="form" class="p-1">
+	<form [formGroup]="form" class="p-1" (ngSubmit)="register()" >
 			<div class="pb-2 d-block d-md-none">
 				<h3 class="border-bottom">Cadastro de Usuário</h3>
 			</div>
@@ -17,20 +17,20 @@
 				<div class="form-group col-sm-6">
 					<label>Primeiro Nome</label>
 					<input type="text" class="form-control"
-          formControlName="firstName"
-					[ngClass]="{'is-invalid': f.firstName.errors && f.firstName.touched}"
+          formControlName="primeiroNome"
+					[ngClass]="{'is-invalid': f.primeiroNome.errors && f.primeiroNome.touched}"
           placeholder="Insira o Primeiro nome" />
-		  <div *ngIf="f.firstName.errors?.required" class="invalid-feedback">
+		  <div *ngIf="f.primeiroNome.errors?.required" class="invalid-feedback">
 			O primeiro nome é obrigatório.
 			</div>
 				</div>
 				<div class="form-group col-sm-6">
 					<label>Último nome</label>
 					<input type="text" class="form-control"
-          formControlName="lastName"
-					[ngClass]="{'is-invalid': f.lastName.errors && f.lastName.touched}"
+          formControlName="ultimoNome"
+					[ngClass]="{'is-invalid': f.ultimoNome.errors && f.ultimoNome.touched}"
           placeholder="Insira o Último nome" />
-		  <div *ngIf="f.lastName.errors?.required" class="invalid-feedback">O último nome é obrigatório.</div>
+		  <div *ngIf="f.ultimoNome.errors?.required" class="invalid-feedback">O último nome é obrigatório.</div>
 				</div>
 			</div>
 			<div class="form-group">
@@ -78,7 +78,7 @@
 			</div>
 			<div class="form-row">
 				<div class="form-group col-12">
-					<button class="btn btn-lg btn-success btn-block px-5">
+					<button [disabled]="!form.valid" class="btn btn-lg btn-success btn-block px-5" type="submit">
 						Registar
 					</button>
 				</div>

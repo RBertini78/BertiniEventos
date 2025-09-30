@@ -6,6 +6,7 @@ namespace BertiniEventos.Domain.Enum
         Tecnologo,
         Bacharel,
         Especialista,
+        PosGraduado,
         Mestrado,
         Doutorado,
         PosDoutorado,

@@ -51,7 +51,14 @@ namespace BertiniEventos.API.Controllers
                 }
                 var user = await _accountService.CreateAccountAsync(userDto);
                 if (user != null)
-                    return Ok(user);
+                    return Ok(
+                        new
+                    {
+                        userName = user.UserName,
+                        firstName = user.FirstName,
+                        token = _tokenService.CreateToken(user).Result
+                    }
+                    );
                 else
                     return BadRequest("Erro ao tentar criar usuário.");
             }
@@ -76,7 +83,7 @@ namespace BertiniEventos.API.Controllers
                     new
                     {
                         userName = user.UserName,
-                        PrimeiroNome = user.PrimeiroNome,
+                        firstName = user.FirstName,
                         token = _tokenService.CreateToken(user).Result
                     }
                 );
@@ -93,13 +100,21 @@ namespace BertiniEventos.API.Controllers
         {
             try
             {
+                if(userUpdateDto.UserName != User.GetUserName())
+                    return Unauthorized("Usuário Inválido.");
+
                 var user = await _accountService.GetUserByUserNameAsync(User.GetUserName());
                 if (user == null) return Unauthorized("Usuário Inválido.");
 
                 var userReturn = await _accountService.UpdateAccount(userUpdateDto);
                 if (userReturn == null) return NoContent();
 
-                return Ok(userReturn);
+                return Ok(new
+                    {
+                        userName = userReturn.UserName,
+                        firstName = userReturn.FirstName,
+                        token = _tokenService.CreateToken(userReturn).Result
+                    });
             }
             catch (System.Exception ex)
             {

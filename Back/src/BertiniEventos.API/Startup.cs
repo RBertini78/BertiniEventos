@@ -55,7 +55,7 @@ namespace BertiniEventos.API
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenKey"])),
                         ValidateIssuer = false,
                         ValidateAudience = false,
-                        ValidateLifetime = false,
+                        ValidateLifetime = true,
                         ValidIssuer = Configuration["Jwt:Issuer"],
                         ValidAudience = Configuration["Jwt:Audience"],
                         ClockSkew = TimeSpan.Zero
@@ -80,7 +80,13 @@ namespace BertiniEventos.API
              services.AddScoped<ILotePersist, LotePersist>();
              services.AddScoped<IUserPersist, UserPersist>();
             
-             services.AddCors();
+             services.AddCors( options =>
+             {
+                 options.AddPolicy("CorsPolicy", builder => builder.WithOrigins("http://localhost:4200")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()                    
+                    .AllowCredentials());
+             });
              services.AddSwaggerGen(options =>
              {
                  options.SwaggerDoc("v1", new OpenApiInfo { Title = "BertiniEventos.API", Version = "v1" });
@@ -126,11 +132,12 @@ namespace BertiniEventos.API
              app.UseHttpsRedirection();
  
              app.UseRouting();
+
+             app.UseCors("CorsPolicy");
  
              app.UseAuthentication();
              app.UseAuthorization();
 
-             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseStaticFiles(new StaticFileOptions{
                 FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Resources")),
