@@ -15,6 +15,7 @@ using AutoMapper;
 using System.IO;
 using BertiniEventos.API.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using BertiniEventos.Persistence.Models;
 
 namespace BertiniEventos.API.Controllers
 {
@@ -37,15 +38,18 @@ namespace BertiniEventos.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery]PageParams pageParams)
         {
             try
             {
-                var eventos = await _eventoService.GetAllEventosAsync(User.GetUserID(), true);
+                var eventos = await _eventoService.GetAllEventosAsync(User.GetUserID(), pageParams, true);
                 if (eventos == null || !eventos.Any())
                     return NotFound("Nenhum evento encontrado.");
 
                 var eventosRetorno = _mapper.Map<List<EventoDto>>(eventos);
+
+                Response.AddPagination(eventos.CurrentPage, eventos.PageSize, eventos.TotalCount, eventos.TotalPages);
+
                 return Ok(eventosRetorno);
             }
             catch (Exception ex)
@@ -71,22 +75,7 @@ namespace BertiniEventos.API.Controllers
             }
         }
 
-        [HttpGet("{tema}/tema")]
-        public async Task<IActionResult> GetByTema(string tema)
-        {
-            try
-            {
-                var eventos = await _eventoService.GetAllEventosByTemaAsync(User.GetUserID(), tema, true);
-                if (eventos == null || !eventos.Any())
-                    return NotFound("Nenhum evento encontrado.");
-
-                return Ok(eventos);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, $"Erro ao tentar recuperar eventos. Erro: {ex.Message}");
-            }
-        }
+        
 
         [HttpPost]
         public async Task<IActionResult> Post(EventoDto model)
