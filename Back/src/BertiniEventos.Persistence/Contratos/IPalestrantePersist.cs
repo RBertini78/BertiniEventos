@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BertiniEventos.Domain;
+using BertiniEventos.Persistence.Models;
 
 namespace BertiniEventos.Persistence.Contratos
 {
     public interface IPalestrantePersist : IGeralPersist
-    {
-        Task<Palestrante[]> GetAllPalestrantesByNomeAsync(string nome, bool includeEventos);
-        Task<Palestrante[]> GetAllPalestrantesAsync(bool includeEventos);
-        Task<Palestrante> GetPalestrantesByIdAsync(int palestranteId, bool includeEventos);
+    {        
+        Task<PageList<Palestrante>> GetAllPalestrantesAsync(PageParams pageParams, bool includeEventos = false);
+        Task<Palestrante> GetPalestranteByUserIdAsync(int userId, bool includeEventos = false);
     }
 }

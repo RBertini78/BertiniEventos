@@ -8,6 +8,7 @@ using BertiniEventos.Application.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using BertiniEventos.API.Extensions;
+using BertiniEventos.API.Helpers;
 
 namespace BertiniEventos.API.Controllers
 {
@@ -18,8 +19,11 @@ namespace BertiniEventos.API.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly ITokenService _tokenService;
-        public AccountController(IAccountService accountService, ITokenService tokenService)
+        private readonly IUtil _util;
+        private readonly string _destino = "Perfil";
+        public AccountController(IAccountService accountService, ITokenService tokenService, IUtil util)
         {
+            _util = util;
             _accountService = accountService;
             _tokenService = tokenService;
         }
@@ -93,14 +97,14 @@ namespace BertiniEventos.API.Controllers
                 return this.StatusCode(StatusCodes.Status500InternalServerError, $"Erro ao tentar realizar login. Erro: {ex.Message}");
             }
         }
-        
+
         [HttpPut("UpdateUser")]
-        
+
         public async Task<IActionResult> UpdateUser(UserUpdateDto userUpdateDto)
         {
             try
             {
-                if(userUpdateDto.UserName != User.GetUserName())
+                if (userUpdateDto.UserName != User.GetUserName())
                     return Unauthorized("Usuário Inválido.");
 
                 var user = await _accountService.GetUserByUserNameAsync(User.GetUserName());
@@ -110,15 +114,38 @@ namespace BertiniEventos.API.Controllers
                 if (userReturn == null) return NoContent();
 
                 return Ok(new
-                    {
-                        userName = userReturn.UserName,
-                        firstName = userReturn.FirstName,
-                        token = _tokenService.CreateToken(userReturn).Result
-                    });
+                {
+                    userName = userReturn.UserName,
+                    firstName = userReturn.FirstName,
+                    token = _tokenService.CreateToken(userReturn).Result
+                });
             }
             catch (System.Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, $"Erro ao tentar atualizar usuário. Erro: {ex.Message}");
+            }
+        }
+        
+        [HttpPost("upload-image")]
+        public async Task<IActionResult> UploadImage()
+        {
+            try
+            {
+                var user = await _accountService.GetUserByUserNameAsync(User.GetUserName());
+                if (user == null) return NoContent();
+
+                var file = Request.Form.Files[0];
+                if (file.Length > 0)
+                {
+                    _util.DeleteImage(user.ImageURL, _destino);
+                    user.ImageURL = await _util.SaveImage(file, _destino);
+                }
+                var userRetorno = await _accountService.UpdateAccount(user);
+                return Ok(userRetorno);
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, $"Erro ao tentar realizar upload de foto do usuário. Erro: {ex.Message}");
             }
         }
     }

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using BertiniEventos.API.Helpers;
 
 namespace BertiniEventos.API
  {
@@ -74,11 +75,16 @@ namespace BertiniEventos.API
              services.AddScoped<ILoteService, LoteService>();
              services.AddScoped<ITokenService, TokenService>();
              services.AddScoped<IAccountService, AccountService>();
+             services.AddScoped<IRedeSocialService, RedeSocialService>();
+             services.AddScoped<IPalestranteService, PalestranteService>();
+             services.AddScoped<IUtil, Util>();
 
              services.AddScoped<IGeralPersist, GeralPersist>();
              services.AddScoped<IEventoPersist, EventosPersist>();
              services.AddScoped<ILotePersist, LotePersist>();
              services.AddScoped<IUserPersist, UserPersist>();
+             services.AddScoped<IRedeSocialPersist, RedeSocialPersist>();
+             services.AddScoped<IPalestrantePersist, PalestrantePersist>();
             
              services.AddCors( options =>
              {
