@@ -1,0 +1,56 @@
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { PaginatedResult } from '@app/models/Pagination';
+import { Palestrante } from '@app/models/Palestrante';
+import { environment } from '@environment/environment';
+import { Observable } from 'rxjs';
+import { map, take } from 'rxjs/operators';
+
+@Injectable({
+  providedIn: 'root'
+})
+
+export class PalestranteService {
+
+baseURL = environment.apiURL + 'api/palestrantes';
+tokenHeader = new HttpHeaders({'Authorization': `Bearer ${localStorage.getItem('token')}`});
+//, {headers: this.tokenHeader}
+
+    constructor(private http: HttpClient) {}
+
+    public getPalestrantes(page?: number, itemsPerPage?: number, term?: string): Observable<PaginatedResult<Palestrante[]>> {
+      const paginatedResult: PaginatedResult<Palestrante[]> = new PaginatedResult<Palestrante[]>();
+      let params = new HttpParams;
+
+      if(page != null && itemsPerPage != null){
+        params = params.append('pageNumber', page.toString());
+        params = params.append('pageSize', itemsPerPage.toString());
+      }
+
+      if(term != null && term != ''){
+        params = params.append('term', term);
+      }
+
+        return this.http.get<Palestrante[]>(this.baseURL + '/all', {observe:'response', params}).pipe(take(1),map((response) => {
+          paginatedResult.result = response.body as Palestrante[];
+          if(response.headers.has('Pagination')){
+            const paginationHeader = response.headers.get('Pagination');
+            if(paginationHeader != null)
+            paginatedResult.pagination = JSON.parse(paginationHeader);
+          }
+          return paginatedResult;
+        }));
+    }
+
+    public getPalestrante(): Observable<Palestrante> {
+        return this.http.get<Palestrante>(`${this.baseURL}`).pipe(take(1));
+    }
+
+    public post(): Observable<Palestrante> {
+        return this.http.post<Palestrante>(this.baseURL, {} as Palestrante).pipe(take(1));
+    }
+    public put(palestrante: Palestrante): Observable<Palestrante> {
+        return this.http.put<Palestrante>(`${this.baseURL}`, palestrante).pipe(take(1));
+    }
+
+}

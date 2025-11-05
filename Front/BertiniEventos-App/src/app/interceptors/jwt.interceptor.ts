@@ -1,9 +1,9 @@
 import { HttpInterceptor, HttpEvent, HttpRequest, HttpHandler } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { User } from '../models/identity/User';
 import { AccountService } from '@app/services/account.service';
-import { switchMap, take } from 'rxjs/operators';
+import { catchError, switchMap, take } from 'rxjs/operators';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
@@ -20,7 +20,16 @@ export class JwtInterceptor implements HttpInterceptor {
       });
     }
 
-    return next.handle(req);
+    return next.handle(req).pipe(
+      catchError(error => {
+      if (error) {
+        localStorage.removeItem('user');
+        this.accountService.logout();
+        location.reload();
+      }
+      return throwError(error);
+    })
+    );
   }
 }
 

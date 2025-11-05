@@ -33,9 +33,12 @@ namespace BertiniEventos.API.Helpers
        
         public void DeleteImage(string imageName, string destino)
         {
+            if (!string.IsNullOrEmpty(imageName))
+            {
             var imagePath = Path.Combine(_hostEnvironment.ContentRootPath, @$"Resources/{destino}", imageName);
             if (System.IO.File.Exists(imagePath))
-                System.IO.File.Delete(imagePath);
+                System.IO.File.Delete(imagePath);                
+            }
         }
     }
 }

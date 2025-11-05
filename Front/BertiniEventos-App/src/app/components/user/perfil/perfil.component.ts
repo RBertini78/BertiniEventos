@@ -8,96 +8,66 @@ import {ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { UserUpdate } from '@app/models/identity/UserUpdate';
+import { TabsModule } from "ngx-bootstrap/tabs";
+import { PerfilDetalheComponent } from "./perfil-detalhe/perfil-detalhe.component";
+import { environment } from '@environment/environment';
+import { PalestranteDetalheComponent } from "@app/components/palestrantes/palestrante-detalhe/palestrante-detalhe.component";
+import { RedesSociaisComponent } from "@app/components/redesSociais/redesSociais.component";
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, TituloComponent, ReactiveFormsModule],
+  imports: [CommonModule, TituloComponent, ReactiveFormsModule, TabsModule, PerfilDetalheComponent, PalestranteDetalheComponent, RedesSociaisComponent],
   templateUrl: './perfil.component.html',
   styleUrls: ['./perfil.component.css']
 })
 export class PerfilComponent implements OnInit {
-  userUpdate = {} as UserUpdate;
-  form!: FormGroup;
+  public usuario = {} as UserUpdate;
+  public file!: File;
+  public imagemURL = '';
 
+  public get ehPalestrante(): boolean {
+    return this.usuario.function === 'Palestrante';
+  }
 
-  constructor(
-    private fb:FormBuilder,
-    public accountService: AccountService,
-    private router: Router,
-    private toastr: ToastrService,
-    private spinner: NgxSpinnerService
-  ) { }
+  constructor(private spinner: NgxSpinnerService, private toastr: ToastrService, private accountService: AccountService) { }
 
-  get f(): any { return this.form.controls; }
+  public setFormValue(usuario: UserUpdate): void {
+    this.usuario = usuario;
+    if(this.usuario)
+      this.imagemURL = environment.apiURL + `resources/perfil/${this.usuario.imagemURL}`;
+    else
+      this.imagemURL = './assets/img/semfoto.png';
+  }
+
 
   ngOnInit() {
-    this.validation();
-    this.carregarUsuario();
-  }
-
-  private carregarUsuario(): void {
-    this.spinner.show();
-    this.accountService.getUser().subscribe(
-      (userRetorno: UserUpdate) => {
-        console.log(userRetorno);
-        this.userUpdate = userRetorno;
-        this.form.patchValue(this.userUpdate);
-        this.toastr.success('Usuário carregado com sucesso', 'Sucesso!');
-      },
-      (error) => {
-        console.error(error);
-        this.toastr.error('Erro ao carregar usuário', 'Erro!');
-        this.router.navigate(['/dashboard']);
-      }
-    ).add(() => this.spinner.hide());
-  }
-
-  private validation() {
-
-    const formOptions: AbstractControlOptions = {
-      validators: ValidatorField.MustMatch('password', 'confirmPassword')
-    };
-
-    this.form = this.fb.group({
-      userName: [''],
-      title: ['NaoInformado',Validators.required] ,
-      firstName: ['',Validators.required],
-      lastName:['',Validators.required],
-      email: ['',Validators.required],
-      phoneNumber: ['',Validators.required],
-      function: ['NaoInformado',Validators.required],
-      description: ['',Validators.required],
-      password: ['',[Validators.nullValidator, Validators.minLength(4)]],
-      confirmPassword: ['',Validators.required],
-    }, formOptions);
 
   }
 
-  onSubmit(): void {
-    this.atualizarUsuario();
-  }
+onFileChange(event: any): void {
+  const reader = new FileReader();
 
-  public atualizarUsuario(): void {
-    console.log(this.form.value);
-    this.userUpdate = { ...this.form.value };
-    this.spinner.show();
-    this.accountService.updateUser(this.userUpdate).subscribe(
-      () => {
-        this.toastr.success('Usuário atualizado com sucesso', 'Sucesso!');
-        this.router.navigate(['/dashboard']);
-      },
-      (error) => {
-        console.error(error);
-        this.toastr.error(error.error);
-      }
-    ).add(() => this.spinner.hide());
-  }
+  reader.onload = (event:any) => this.imagemURL = event.target.result;
 
-  //event passado como parâmetro para evitar postback e realizar somente o form reset
-  public resetForm(event: any): void {
-    event.preventDefault();
-    this.form.reset();
-  }
+  this.file = event.target.files;
+  reader.readAsDataURL(this.file[0]);
+
+  this.uploadImage();
+}
+
+private uploadImage(): void {
+  this.spinner.show();
+
+  this.accountService.postUpload(this.file).subscribe(
+    () => {
+      this.toastr.success('Imagem atualizada com sucesso.', 'Sucesso!');
+    },
+    (error: any) => {
+      this.toastr.error('Erro ao fazer upload de imagem.', 'Erro!');
+      console.error(error);
+    }
+  ).add(() => this.spinner.hide());
+}
 
 }

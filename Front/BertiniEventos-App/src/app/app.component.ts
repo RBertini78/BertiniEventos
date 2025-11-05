@@ -26,7 +26,7 @@ import { User } from './models/identity/User';
     PalestrantesComponent,
     ContatosComponent,
     DashboardComponent,
-    PerfilComponent
+    PerfilComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './app.component.html',

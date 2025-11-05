@@ -1,223 +1,88 @@
-<app-titulo [titulo]="'Perfil'" [iconClass]="'fas fa-address-card'"></app-titulo>
+<app-titulo
+  [titulo]="'Perfil' + (ehPalestrante ? ' Palestrante' : '')"
+  [iconClass]="'fas fa-address-card'"
+></app-titulo>
 <div class="card rounded shadow-sm">
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="form">
-    <div class="row p-3">
-      <div class="col-lg-3 pt-1">
-        <div class="card mb-3">
-          <div class="card-header"></div>
-          <div class="d-flex align-self-center pt-3">
-            <a>
-              <img
-                src="https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcRbezqZpEuwGSvitKy3wrwnth5kysKdRqBW54cAszm_wiutku3R"
-                name="aboutme"
-                width="120"
-                height="120"
-                class="rounded-circle"
-                alt="Foto de Perfil"
-              />
-            </a>
-          </div>
-          <div class="card-body">
-            <div class="h4 text-center mb-3">&#64;{{f.userName.value}}</div>
-            <div class="h7 text-bold pb-1"><b>Nome:</b> {{f.firstName.value + ' ' + f.lastName.value}}</div>
-            <div class="h7">
-              {{f.description.value}}
-            </div>
-          </div>
-          <ul class="list-group list-group-flush">
-            <li class="list-group-item">
-              <div class="row">
-                <div class="col-6 text-center border-right">
-                  <div class="h5">0</div>
-                  <div class="h6 text-muted">Meus Eventos Criados</div>
-                </div>
-                <div class="col-6 text-center">
-                  <div class="h5">0</div>
-                  <div class="h6 text-muted">Eventos como participante</div>
-                </div>
-              </div>
-            </li>
-          </ul>
-          <div class="card-footer"></div>
+  <div class="row p-3">
+    <div class="col-lg-3 pt-1">
+      <div class="card mb-3">
+        <div class="card-header">
+          <input
+            type="file"
+            #file
+            style="display: none"
+            (change)="onFileChange($event)"
+          />
         </div>
-      </div>
-      <div class="col-lg-9">
-        <div class="form-row">
-          <div class="form-group col-12">
-            <h3 class="border-bottom">Detalhe Perfil</h3>
+        <div class="d-flex align-self-center pt-3">
+          <img
+            [src]="imagemURL"
+            width="120"
+            height="120"
+            class="rounded-circle"
+            (click)="file.click()"
+            name="aboutme"
+            width="120"
+            height="120"
+            style="cursor: pointer"
+            alt="Foto de Perfil"
+          />
+        </div>
+        <div class="card-body">
+          <div class="h4 text-center mb-3">&#64;{{ usuario.userName }}</div>
+          <div class="h7 text-bold pb-1">
+            <b>Nome:</b> {{ usuario.firstName + " " + usuario.lastName }}
           </div>
-          <div class="form-group col">
-            <label for="tituloSelect">Título</label>
-            <select
-              formControlName="title"
-              class="form-control"
-              [ngClass]="{ 'is-invalid': f.title?.errors && f.title.touched }"
-            >
-              <option value="NaoInformado">Não Quero</option>
-              <option value="Tecnologo">Tecnólogo(a)</option>
-              <option value="Bacharel">Bacharel</option>
-              <option value="Especialista">Especialista</option>
-              <option value="PosGraduado">Pós Graduado(a)</option>
-              <option value="Mestrado">Mestre</option>
-              <option value="Doutorado">Doutor(a)</option>
-              <option value="PosDoutorado">Pós Doc</option>
-            </select>
-            <div
-              *ngIf="f.title.errors && f.title.touched"
-              class="invalid-feedback"
-            >
-              <div *ngIf="f.title?.errors?.required">Título é obrigatório.</div>
-            </div>
+          <div class="h7">
+            {{ usuario.description }}
           </div>
-          <div class="form-group col-sm-5">
-            <label>Primeiro Nome</label>
-            <input
-              type="text"
-              formControlName="firstName"
-              class="form-control"
-              [ngClass]="{
-                'is-invalid': f.firstName.errors && f.firstName.touched
-              }"
-            />
-            <div
-              *ngIf="f.firstName.errors && f.firstName.touched"
-              class="invalid-feedback"
-            >
-              <div *ngIf="f.firstName?.errors?.required">
-                Primeiro nome é obrigatório.
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <div class="row">
+              <div class="col-6 text-center border-right">
+                <div class="h5">0</div>
+                <div class="h6 text-muted">Meus Eventos Criados</div>
+              </div>
+              <div class="col-6 text-center">
+                <div class="h5">0</div>
+                <div class="h6 text-muted">Eventos como {{ehPalestrante ? ' Palestrante' : ' Participante'}}</div>
               </div>
             </div>
-          </div>
-          <div class="form-group col-sm-5">
-            <label>Último nome</label>
-            <input
-              type="text"
-              formControlName="lastName"
-              class="form-control"
-              [ngClass]="{
-                'is-invalid': f.lastName.errors && f.lastName.touched
-              }"
-            />
-          </div>
-          <div
-            *ngIf="f.lastName.errors && f.lastName.touched"
-            class="invalid-feedback"
-          >
-            <div *ngIf="f.lastName?.errors?.required">
-              Último nome é obrigatório.
-            </div>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group col-sm-5">
-            <label>E-mail</label>
-            <input
-              type="text"
-              formControlName="email"
-              class="form-control"
-              [ngClass]="{ 'is-invalid': f.email.errors && f.email.touched }"
-            />
-            <div
-              *ngIf="f.email.errors && f.email.touched"
-              class="invalid-feedback"
-            >
-              <div *ngIf="f.email?.errors?.required">e-mail é obrigatório</div>
-              <div *ngIf="f.email?.errors?.email">
-                e-mail precisa ser um endereço válido.
-              </div>
-            </div>
-          </div>
-          <div class="form-group col-sm-4">
-            <label>Telefone</label>
-            <input
-              type="text"
-              formControlName="phoneNumber"
-              class="form-control"
-              [ngClass]="{
-                'is-invalid': f.phoneNumber.errors && f.phoneNumber.touched
-              }"
-            />
-            <div
-              *ngIf="f.phoneNumber.errors && f.phoneNumber.touched"
-              class="invalid-feedback"
-            >
-              <div *ngIf="f.phoneNumber?.errors?.required">
-                Telefone é obrigatório.
-              </div>
-            </div>
-          </div>
-          <div class="form-group col-sm">
-            <label for="funcaoSelect">Função</label>
-            <select
-              class="form-control"
-              formControlName="function"
-              [ngClass]="{'is-invalid':f.function.errors && f.function.touched}"
-            >
-              <option value="NaoInformado">Não Informado</option>
-              <option value="Participante">Participante</option>
-              <option value="Palestrante">Palestrante</option>
-            </select>
-			<div *ngIf="f.function.errors && f.function.touched" class="invalid-feedback">
-				<div *ngIf="f.function?.errors?.required">Função é obrigatório.</div>
-			  </div>
-          </div>
-          <div class="form-group col-12">
-            <label>Descrição</label>
-            <input
-              type="text"
-              formControlName="description"
-              class="form-control"
-			  [ngClass]="{'is-invalid': f.description.errors && f.description.touched}"
-            />
-			<div *ngIf="f.description.errors && f.description.touched" class="invalid-feedback">
-				<div *ngIf="f.description?.errors?.required">Descrição é obrigatório.</div>
-			</div>
-          </div>
-        </div>
-        <div>
-          <h3 class="pt-3 border-bottom">Mudar Senha</h3>
-          <p>Caso mude de senha, preencha os campos abaixo:</p>
-        </div>
-        <div class="form-row">
-          <div class="form-group col-sm">
-            <label>Senha</label>
-            <input
-              type="password"
-              formControlName="password"
-              class="form-control"
-			  [ngClass]="{ 'is-invalid': f.password.errors && f.password.touched }"
-            />
-			<div *ngIf="f.password.errors && f.password.touched" class="invalid-feedback">
-				<div *ngIf="f.password?.errors?.required">Senha é obrigatório</div>
-				<div *ngIf="f.password?.errors?.minlength">Senha precisa ter pelo menos 6 caracteres</div>
-			  </div>
-          </div>
-          <div class="form-group col-sm">
-            <label>Confirmar Senha</label>
-            <input
-              type="password"
-              formControlName="confirmPassword"
-              class="form-control"
-			  [ngClass]="{ 'is-invalid': f.confirmPassword.errors && f.confirmPassword.touched }"
-            />
-			<div *ngIf="f.confirmPassword.errors && f.confirmPassword.touched" class="invalid-feedback">
-				<div *ngIf="f.confirmPassword?.errors?.required">Confirmação de senha é Obrigatório</div>
-				<div *ngIf="f.confirmPassword?.errors?.mustMatch">Repedir a senha é obrigatório.</div>
-			  </div>
-          </div>
-        </div>
+          </li>
+        </ul>
+        <div class="card-footer"></div>
       </div>
     </div>
-    <div class="card-footer">
-      <div class="d-flex">
-        <button (click)="resetForm($event)" class="btn btn-outline-secondary ms-auto border">
-          Cancelar Alteração
-        </button>
-        <button class="btn btn-success" type="submit">
-          <span class="spinner-border spinner-border-sm ms-1"></span>
-          Salvar Alteração
-        </button>
-      </div>
+    <div class="col-lg-9">
+      <tabset>
+        <tab class="border border-top-0 p-3">
+          <ng-template tabHeading>
+            <i class="fa fa-address-card me-2"></i><span>Perfil</span>
+          </ng-template>
+          <app-perfil-detalhe
+            (changeFormValue)="setFormValue($event)"
+          ></app-perfil-detalhe>
+        </tab>
+        <tab *ngIf="ehPalestrante" class="border border-top-0 p-3">
+          <ng-template tabHeading>
+            <i class="fa fa-user me-2"></i><span>Palestrante</span>
+          </ng-template>
+          <div class="form-group">
+            <h3 class="border-bottom">Palestrante</h3>
+          </div>
+          <app-palestrante-detalhe></app-palestrante-detalhe>>
+        </tab>
+        <tab *ngIf="ehPalestrante" class="border border-top-0 p-3">
+          <ng-template tabHeading>
+            <i class="fa fa-share-square me-2"></i><span>Rede Social</span>
+          </ng-template>
+          <div class="form-group">
+            <h3 class="border-bottom">Rede Social</h3>
+          </div>
+          <app-redesSociais></app-redesSociais>
+        </tab>
+      </tabset>
     </div>
-  </form>
+  </div>
 </div>

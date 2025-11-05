@@ -21,6 +21,7 @@ import { Lote } from '@app/models/Lote';
 import { environment } from 'src/environments/environment';
 import e from 'express';
 import { first } from 'rxjs';
+import { RedesSociaisComponent } from "@app/components/redesSociais/redesSociais.component";
 
 
 defineLocale('pt-br', ptBrLocale);
@@ -38,7 +39,8 @@ defineLocale('pt-br', ptBrLocale);
     BsDatepickerModule,
     DateTimeFormatPipe,
     TooltipModule,
-  ],
+    RedesSociaisComponent
+],
   templateUrl: './evento-detalhe.component.html',
   styleUrl: './evento-detalhe.component.scss',
   providers: [DatePipe],
