@@ -1,6 +1,7 @@
 # BertiniEventos
 
 **BertiniEventos** é uma aplicação fullstack desenvolvida em C# (.NET) no backend e Angular no frontend. O sistema foi criado como parte de um curso prático e tem como objetivo oferecer uma plataforma completa para gerenciamento de eventos.
+(Sistema ficou incompleto devido ao curso publicado na Udemy não ter continuidade e atualização)
 
 ## 📌 Funcionalidades
 
